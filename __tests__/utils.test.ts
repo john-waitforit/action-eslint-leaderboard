@@ -4,7 +4,7 @@ import {
   diffWithDisableNextLineRemoved,
   diffWithNewFileDisableAndNextLineRemoved,
   diffWithTwoNewDisableLines
-} from './mock-diff'
+} from './git-diff-mock'
 import gitDiffParser from 'gitdiff-parser'
 
 describe('Score utils', () => {

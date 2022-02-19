@@ -53,6 +53,49 @@ export const getMe = async (): Promise<string> => {
   return names[0] ?? 'No author found'
 }
 
+export const getPullRequestCommits = async (): Promise<string[]> => {
+  const commits = await executeGitCommand([
+    'rev-list',
+    '--no-merges',
+    '--format="%H"',
+    '^master'
+  ])
+
+  core.info(`Pull request commits detected: ${commits}`)
+  return commits
+}
+
+export const getAllScores = async (
+  commits: string[]
+): Promise<Record<string, number>> => {
+  const allScores: Record<string, number> = {}
+
+  for (const commit of commits) {
+    const author = await getAuthor(commit)
+    const score = await getScore(commit)
+
+    if (author in allScores) {
+      allScores[author] += score
+    } else {
+      allScores[author] = 0
+    }
+  }
+
+  return allScores
+}
+
+export const getPullRequestScore = async (): Promise<number> => {
+  const pullRequestCommits = await getPullRequestCommits()
+  let score = 0
+
+  for (const commit of pullRequestCommits) {
+    const commitScore = await getScore(commit)
+    score += commitScore
+  }
+
+  return score
+}
+
 export const getScore = async (commit: string): Promise<number> => {
   try {
     const diffLines = await executeGitCommand(
