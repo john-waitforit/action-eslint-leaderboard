@@ -10,8 +10,8 @@ export const getMonday = (inputDate: Date): Date => {
   const day = inputDate.getDay()
   const diff = inputDate.getDate() - day + (day === 0 ? -6 : 1) // adjust when day is sunday
 
-  monday.setDate(diff)
-  monday.setHours(1, 0, 0, 0)
+  monday.setUTCDate(diff)
+  monday.setUTCHours(0, 0, 0, 0)
 
   return new Date(monday)
 }
