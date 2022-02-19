@@ -24,4 +24,4 @@ jobs:
       - uses: ./
         id: 'eslint-leaderboard'
       - run: |
-          echo ${{ steps.eslint-leaderboard.outputs.pr-comment }}
+          echo "${{ steps.eslint-leaderboard.outputs.pr-comment }}"
