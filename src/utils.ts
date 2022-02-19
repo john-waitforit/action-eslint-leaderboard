@@ -29,18 +29,28 @@ const executeGitCommand = async (
   return output
 }
 
-export const getCommits = async (): Promise<string[]> => {
-  const commits = await executeGitCommand(['log', '--format="%H"'])
+export const getWeeksCommits = async (): Promise<string[]> => {
+  const monday = getMonday(new Date())
+
+  const commits = await executeGitCommand([
+    'rev-list',
+    '--no-merges',
+    '--format="%H"',
+    `--since="${monday.toISOString()}"`
+  ])
 
   core.info(`commits detected: ${commits}`)
   return commits
 }
 
-export const getAuthor = async (
-  commit: string
-): Promise<string | undefined> => {
-  const authors = await executeGitCommand(['log', '--format="%ae"', commit])
-  return authors[0]
+export const getAuthor = async (commit: string): Promise<string> => {
+  const authors = await executeGitCommand(['log', '--format="%cN"', commit])
+  return authors[0] ?? 'No author found'
+}
+
+export const getMe = async (): Promise<string> => {
+  const names = await executeGitCommand(['config', 'user.name'])
+  return names[0] ?? 'No author found'
 }
 
 export const getScore = async (commit: string): Promise<number> => {
@@ -102,4 +112,16 @@ const getScoreMultiplier = (change: Change): number => {
     case 'normal':
       return 0
   }
+}
+
+export const getMonday = (inputDate: Date): Date => {
+  const monday = new Date(inputDate)
+
+  const day = inputDate.getDay()
+  const diff = inputDate.getDate() - day + (day === 0 ? -6 : 1) // adjust when day is sunday
+
+  monday.setDate(diff)
+  monday.setHours(1, 0, 0, 0)
+
+  return new Date(monday)
 }

@@ -1,5 +1,5 @@
 import {expect, describe, it} from '@jest/globals'
-import {getFileScore} from '../src/utils'
+import {getFileScore, getMonday} from '../src/utils'
 import {
   diffWithDisableNextLineRemoved,
   diffWithNewFileDisableAndNextLineRemoved,
@@ -30,6 +30,13 @@ describe('Score utils', () => {
       expect(files.length === 1)
 
       expect(getFileScore(files[0])).toBe(-9)
+    })
+  })
+
+  describe('getMonday', () => {
+    it('should return 14/02/2022 when given 19/02/2022', () => {
+      const monday = getMonday(new Date('2022-02-19T11:11:33.165Z'))
+      expect(monday.toISOString()).toBe('2022-02-14T00:00:00.000Z')
     })
   })
 })

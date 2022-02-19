@@ -1,15 +1,21 @@
 import * as core from '@actions/core'
-import {getAuthor, getCommits, getScore} from './utils'
+import {getAuthor, getScore, getWeeksCommits} from './utils'
 
 async function run(): Promise<void> {
   try {
-    const commits = await getCommits()
+    const commits = await getWeeksCommits()
+
+    const allScores: Record<string, number> = {}
 
     for (const commit of commits) {
       const author = await getAuthor(commit)
       const score = await getScore(commit)
-      core.info(`author: ${author}`)
-      core.info(`score: ${score}`)
+
+      if (author in allScores) {
+        allScores[author] += score
+      } else {
+        allScores[author] = 0
+      }
     }
 
     core.setOutput('time', new Date().toTimeString())
