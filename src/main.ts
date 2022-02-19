@@ -1,10 +1,6 @@
 import * as core from '@actions/core'
-import {
-  getAllScores,
-  getMe,
-  getPullRequestScore,
-  getWeeksCommits
-} from './utils'
+import {getAllScores, getPullRequestScore} from './score'
+import {getMe, getWeeksCommits} from './git-commands'
 import {generatePrComment} from './pull-request-comment'
 
 async function run(): Promise<void> {

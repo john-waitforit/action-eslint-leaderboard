@@ -1,5 +1,6 @@
 import {expect, describe, it} from '@jest/globals'
-import {getFileScore, getMonday} from '../src/utils'
+import {getMonday} from '../src/utils'
+import {getFileScore} from '../src/score'
 import {
   diffWithDisableNextLineRemoved,
   diffWithNewFileDisableAndNextLineRemoved,
