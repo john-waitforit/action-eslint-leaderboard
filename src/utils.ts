@@ -1,13 +1,27 @@
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
+import gitDiffParser, {Change, File} from 'gitdiff-parser'
 
-const executeGitCommand = async (args: string[]): Promise<string[]> => {
+const POINTS = {
+  NEXT_LINE: 1,
+  FILE: 10
+} as const
+
+const executeGitCommand = async (
+  args: string[],
+  splitLines = true
+): Promise<string[]> => {
   const output: string[] = []
   await exec.exec('git', args, {
     silent: true,
     listeners: {
       stdout: (data: Buffer) => {
-        output.push(...data.toString().replace(/"/g, '').trim().split('\n'))
+        const outputString = data.toString().replace(/"/g, '').trim()
+        if (splitLines) {
+          output.push(...outputString.split('\n'))
+        } else {
+          output.push(outputString)
+        }
       }
     }
   })
@@ -22,7 +36,70 @@ export const getCommits = async (): Promise<string[]> => {
   return commits
 }
 
-export const getAuthor = async (commit: string): Promise<string> => {
+export const getAuthor = async (
+  commit: string
+): Promise<string | undefined> => {
   const authors = await executeGitCommand(['log', '--format="%ae"', commit])
   return authors[0]
+}
+
+export const getScore = async (commit: string): Promise<number> => {
+  try {
+    const diffLines = await executeGitCommand(
+      ['diff', `${commit}~`, commit],
+      false
+    )
+    const files = gitDiffParser.parse(diffLines[0])
+
+    let score = 0
+    for (const file of files) {
+      score += getFileScore(file)
+    }
+
+    return score
+  } catch (e) {
+    return 0
+  }
+}
+
+export const getFileScore = (file: File): number => {
+  let score = 0
+
+  for (const chunk of file.hunks) {
+    for (const change of chunk.changes) {
+      score += getChangeScore(change)
+    }
+  }
+
+  return score
+}
+
+export const containsEslintDisableNextLine = (text: string): boolean =>
+  text.trim().includes('eslint-disable-next-line')
+
+export const containsEslintDisableFile = (text: string): boolean =>
+  text.trim().includes('eslint-disable ')
+
+export const getChangeScore = (change: Change): number => {
+  let score = 0
+  const scoreMultiplier = getScoreMultiplier(change)
+
+  if (containsEslintDisableNextLine(change.content)) {
+    score += scoreMultiplier * POINTS['NEXT_LINE']
+  } else if (containsEslintDisableFile(change.content)) {
+    score += scoreMultiplier * POINTS['FILE']
+  }
+
+  return score
+}
+
+const getScoreMultiplier = (change: Change): number => {
+  switch (change.type) {
+    case 'delete':
+      return 1
+    case 'insert':
+      return -1
+    case 'normal':
+      return 0
+  }
 }

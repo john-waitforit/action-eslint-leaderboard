@@ -26,7 +26,8 @@
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.6.0",
-    "@actions/exec": "^1.1.0"
+    "@actions/exec": "^1.1.0",
+    "gitdiff-parser": "^0.2.2"
   },
   "devDependencies": {
     "@types/node": "^16.10.5",

@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import {getAuthor, getCommits} from './utils'
+import {getAuthor, getCommits, getScore} from './utils'
 
 async function run(): Promise<void> {
   try {
@@ -7,7 +7,9 @@ async function run(): Promise<void> {
 
     for (const commit of commits) {
       const author = await getAuthor(commit)
+      const score = await getScore(commit)
       core.info(`author: ${author}`)
+      core.info(`score: ${score}`)
     }
 
     core.setOutput('time', new Date().toTimeString())
