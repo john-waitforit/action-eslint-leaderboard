@@ -76,11 +76,11 @@ const getWeeksCommits = () => __awaiter(void 0, void 0, void 0, function* () {
     const monday = (0, utils_1.getMonday)(new Date());
     const commits = yield executeGitCommand([
         'rev-list',
+        'HEAD',
         '--no-merges',
-        '--format="%H"',
         `--since="${monday.toISOString()}"`
     ]);
-    core.info(`commits detected: ${commits}`);
+    core.info(`Fetched current week's commits: ${commits}`);
     return commits;
 });
 exports.getWeeksCommits = getWeeksCommits;
@@ -99,9 +99,10 @@ exports.getMe = getMe;
 const getPullRequestCommits = () => __awaiter(void 0, void 0, void 0, function* () {
     const commits = yield executeGitCommand([
         'rev-list',
+        'HEAD',
         '--no-merges',
         '--format="%H"',
-        '^master'
+        '^main'
     ]);
     core.info(`Pull request commits detected: ${commits}`);
     return commits;
@@ -159,8 +160,11 @@ function run() {
         try {
             const commits = yield (0, git_commands_1.getWeeksCommits)();
             const allScores = yield (0, score_1.getAllScores)(commits);
+            core.info(`Calculated all score from previous week: ${JSON.stringify(allScores)}`);
             const me = yield (0, git_commands_1.getMe)();
+            core.info(`Fetched info about current user: ${me}`);
             const pullRequestScore = yield (0, score_1.getPullRequestScore)();
+            core.info(`Calculated score of current PR: ${pullRequestScore}`);
             const prComment = (0, pull_request_comment_1.generatePrComment)(allScores, me, pullRequestScore);
             core.setOutput('pr-comment', prComment);
         }
@@ -218,7 +222,9 @@ const generatePodium = (sortedLeaderboardEntries) => {
         `${first}|${second}|${third}`);
 };
 exports.generatePodium = generatePodium;
-const formatLeaderboardEntry = (leaderboardEntry) => `**${leaderboardEntry.author}** (${leaderboardEntry.score})`;
+const formatLeaderboardEntry = (leaderboardEntry) => leaderboardEntry
+    ? `**${leaderboardEntry.author}** (${leaderboardEntry.score})`
+    : ``;
 const generateYourScore = (sortedLeaderboardEntries, me, pullRequestScore) => {
     const myLeaderboardIndex = sortedLeaderboardEntries.findIndex(entry => entry.author === me);
     const weekScore = myLeaderboardIndex === -1

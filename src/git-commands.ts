@@ -29,12 +29,12 @@ export const getWeeksCommits = async (): Promise<string[]> => {
 
   const commits = await executeGitCommand([
     'rev-list',
+    'HEAD',
     '--no-merges',
-    '--format="%H"',
     `--since="${monday.toISOString()}"`
   ])
 
-  core.info(`commits detected: ${commits}`)
+  core.info(`Fetched current week's commits: ${commits}`)
   return commits
 }
 
@@ -51,9 +51,10 @@ export const getMe = async (): Promise<string> => {
 export const getPullRequestCommits = async (): Promise<string[]> => {
   const commits = await executeGitCommand([
     'rev-list',
+    'HEAD',
     '--no-merges',
     '--format="%H"',
-    '^master'
+    '^main'
   ])
 
   core.info(`Pull request commits detected: ${commits}`)

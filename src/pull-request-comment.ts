@@ -50,8 +50,12 @@ export const generatePodium = (
   )
 }
 
-const formatLeaderboardEntry = (leaderboardEntry: LeaderboardEntry): string =>
-  `**${leaderboardEntry.author}** (${leaderboardEntry.score})`
+const formatLeaderboardEntry = (
+  leaderboardEntry: LeaderboardEntry | undefined
+): string =>
+  leaderboardEntry
+    ? `**${leaderboardEntry.author}** (${leaderboardEntry.score})`
+    : ``
 
 export const generateYourScore = (
   sortedLeaderboardEntries: LeaderboardEntry[],
