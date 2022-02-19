@@ -1,11 +1,9 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
-inputs:
-  milliseconds: # change this
-    required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+name: 'action-eslint-leaderboard'
+description: 'Generate a leaderboard based on eslint-disable comments removed'
+author: 'john-waitforit'
+outputs:
+  pr-comment:
+    description: 'The content of the comment that can be put in a pull request comment'
 runs:
   using: 'node12'
   main: 'dist/index.js'
