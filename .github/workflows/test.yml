@@ -22,5 +22,6 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./
-        with:
-          milliseconds: 1000
+        id: 'eslint-leaderboard'
+      - run: |
+          echo ${{ steps.eslint-leaderboard.outputs.pr-comment }}
