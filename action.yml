@@ -1,6 +1,11 @@
 name: 'action-eslint-leaderboard'
 description: 'Generate a leaderboard based on eslint-disable comments removed'
 author: 'john-waitforit'
+inputs:
+  mainBranchName:
+    required: false
+    description: 'Name of your main branch (usually main, but could be master)'
+    default: 'main'
 outputs:
   pr-comment:
     description: 'The content of the comment that can be put in a pull request comment'

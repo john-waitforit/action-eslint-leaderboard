@@ -50,8 +50,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getCommitDiff = exports.getPullRequestCommits = exports.getMe = exports.getAuthor = exports.getWeeksCommits = void 0;
-const core = __importStar(__nccwpck_require__(186));
+exports.getCommitDiff = exports.getPullRequestCommits = exports.getAuthor = exports.getWeeksCommits = void 0;
 const exec = __importStar(__nccwpck_require__(514));
 const utils_1 = __nccwpck_require__(918);
 const executeGitCommand = (args, splitLines = true) => __awaiter(void 0, void 0, void 0, function* () {
@@ -74,43 +73,58 @@ const executeGitCommand = (args, splitLines = true) => __awaiter(void 0, void 0,
 });
 const getWeeksCommits = () => __awaiter(void 0, void 0, void 0, function* () {
     const monday = (0, utils_1.getMonday)(new Date());
-    const commits = yield executeGitCommand([
-        'rev-list',
-        'HEAD',
-        '--no-merges',
-        `--since="${monday.toISOString()}"`
-    ]);
-    core.info(`Fetched current week's commits: ${commits}`);
-    return commits;
+    try {
+        const commits = yield executeGitCommand([
+            'rev-list',
+            'HEAD',
+            '--no-merges',
+            `--since="${monday.toISOString()}"`
+        ]);
+        return commits;
+    }
+    catch (e) {
+        return [];
+    }
 });
 exports.getWeeksCommits = getWeeksCommits;
 const getAuthor = (commit) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const authors = yield executeGitCommand(['log', '--format="%cN"', commit]);
-    return (_a = authors[0]) !== null && _a !== void 0 ? _a : 'No author found';
+    const NO_AUTHOR = 'No author found';
+    if (!commit)
+        return NO_AUTHOR;
+    try {
+        const authors = yield executeGitCommand(['log', '--format="%cN"', commit]);
+        return (_a = authors[0]) !== null && _a !== void 0 ? _a : NO_AUTHOR;
+    }
+    catch (e) {
+        return NO_AUTHOR;
+    }
 });
 exports.getAuthor = getAuthor;
-const getMe = () => __awaiter(void 0, void 0, void 0, function* () {
-    var _b;
-    const names = yield executeGitCommand(['config', 'user.name']);
-    return (_b = names[0]) !== null && _b !== void 0 ? _b : 'No author found';
-});
-exports.getMe = getMe;
-const getPullRequestCommits = () => __awaiter(void 0, void 0, void 0, function* () {
-    const commits = yield executeGitCommand([
-        'rev-list',
-        'HEAD',
-        '--no-merges',
-        '--format="%H"',
-        '^main'
-    ]);
-    core.info(`Pull request commits detected: ${commits}`);
-    return commits;
+const getPullRequestCommits = (mainBranchName) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const commits = yield executeGitCommand([
+            'rev-list',
+            'HEAD',
+            '--no-merges',
+            '--format="%H"',
+            `^${mainBranchName}`
+        ]);
+        return commits;
+    }
+    catch (e) {
+        return [];
+    }
 });
 exports.getPullRequestCommits = getPullRequestCommits;
 const getCommitDiff = (commit) => __awaiter(void 0, void 0, void 0, function* () {
-    const diffLines = yield executeGitCommand(['diff', `${commit}~`, commit], false);
-    return diffLines[0];
+    try {
+        const diffLines = yield executeGitCommand(['diff', `${commit}~`, commit], false);
+        return diffLines[0];
+    }
+    catch (e) {
+        return '';
+    }
 });
 exports.getCommitDiff = getCommitDiff;
 
@@ -158,12 +172,16 @@ const pull_request_comment_1 = __nccwpck_require__(872);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            const mainBranchName = core.getInput('mainBranchName') || 'main';
             const commits = yield (0, git_commands_1.getWeeksCommits)();
+            core.info(`Fetched current week's commits: ${JSON.stringify(commits)}`);
             const allScores = yield (0, score_1.getAllScores)(commits);
             core.info(`Calculated all score from previous week: ${JSON.stringify(allScores)}`);
-            const me = yield (0, git_commands_1.getMe)();
+            const pullRequestCommits = yield (0, git_commands_1.getPullRequestCommits)(mainBranchName);
+            core.info(`Fetched pull request commits: ${JSON.stringify(pullRequestCommits)}`);
+            const me = yield (0, git_commands_1.getAuthor)(pullRequestCommits[0]);
             core.info(`Fetched info about current user: ${me}`);
-            const pullRequestScore = yield (0, score_1.getPullRequestScore)();
+            const pullRequestScore = yield (0, score_1.getPullRequestScore)(pullRequestCommits);
             core.info(`Calculated score of current PR: ${pullRequestScore}`);
             const prComment = (0, pull_request_comment_1.generatePrComment)(allScores, me, pullRequestScore);
             core.setOutput('pr-comment', prComment);
@@ -294,8 +312,7 @@ const getAllScores = (commits) => __awaiter(void 0, void 0, void 0, function* ()
     return allScores;
 });
 exports.getAllScores = getAllScores;
-const getPullRequestScore = () => __awaiter(void 0, void 0, void 0, function* () {
-    const pullRequestCommits = yield (0, git_commands_1.getPullRequestCommits)();
+const getPullRequestScore = (pullRequestCommits) => __awaiter(void 0, void 0, void 0, function* () {
     let score = 0;
     for (const commit of pullRequestCommits) {
         const commitScore = yield (0, exports.getCommitScore)(commit);

@@ -1,4 +1,3 @@
-import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import {getMonday} from './utils'
 
@@ -27,44 +26,60 @@ const executeGitCommand = async (
 export const getWeeksCommits = async (): Promise<string[]> => {
   const monday = getMonday(new Date())
 
-  const commits = await executeGitCommand([
-    'rev-list',
-    'HEAD',
-    '--no-merges',
-    `--since="${monday.toISOString()}"`
-  ])
+  try {
+    const commits = await executeGitCommand([
+      'rev-list',
+      'HEAD',
+      '--no-merges',
+      `--since="${monday.toISOString()}"`
+    ])
 
-  core.info(`Fetched current week's commits: ${commits}`)
-  return commits
+    return commits
+  } catch (e) {
+    return []
+  }
 }
 
-export const getAuthor = async (commit: string): Promise<string> => {
-  const authors = await executeGitCommand(['log', '--format="%cN"', commit])
-  return authors[0] ?? 'No author found'
+export const getAuthor = async (
+  commit: string | undefined
+): Promise<string> => {
+  const NO_AUTHOR = 'No author found'
+  if (!commit) return NO_AUTHOR
+
+  try {
+    const authors = await executeGitCommand(['log', '--format="%cN"', commit])
+    return authors[0] ?? NO_AUTHOR
+  } catch (e) {
+    return NO_AUTHOR
+  }
 }
 
-export const getMe = async (): Promise<string> => {
-  const names = await executeGitCommand(['config', 'user.name'])
-  return names[0] ?? 'No author found'
-}
+export const getPullRequestCommits = async (
+  mainBranchName: string
+): Promise<string[]> => {
+  try {
+    const commits = await executeGitCommand([
+      'rev-list',
+      'HEAD',
+      '--no-merges',
+      '--format="%H"',
+      `^${mainBranchName}`
+    ])
 
-export const getPullRequestCommits = async (): Promise<string[]> => {
-  const commits = await executeGitCommand([
-    'rev-list',
-    'HEAD',
-    '--no-merges',
-    '--format="%H"',
-    '^main'
-  ])
-
-  core.info(`Pull request commits detected: ${commits}`)
-  return commits
+    return commits
+  } catch (e) {
+    return []
+  }
 }
 
 export const getCommitDiff = async (commit: string): Promise<string> => {
-  const diffLines = await executeGitCommand(
-    ['diff', `${commit}~`, commit],
-    false
-  )
-  return diffLines[0]
+  try {
+    const diffLines = await executeGitCommand(
+      ['diff', `${commit}~`, commit],
+      false
+    )
+    return diffLines[0]
+  } catch (e) {
+    return ''
+  }
 }

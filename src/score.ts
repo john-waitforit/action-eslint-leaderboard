@@ -1,5 +1,5 @@
 import {containsEslintDisableFile, containsEslintDisableNextLine} from './utils'
-import {getAuthor, getCommitDiff, getPullRequestCommits} from './git-commands'
+import {getAuthor, getCommitDiff} from './git-commands'
 import gitDiffParser, {Change, File} from 'gitdiff-parser'
 import {POINTS} from './constants'
 
@@ -22,8 +22,9 @@ export const getAllScores = async (
   return allScores
 }
 
-export const getPullRequestScore = async (): Promise<number> => {
-  const pullRequestCommits = await getPullRequestCommits()
+export const getPullRequestScore = async (
+  pullRequestCommits: string[]
+): Promise<number> => {
   let score = 0
 
   for (const commit of pullRequestCommits) {
