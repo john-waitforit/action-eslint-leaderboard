@@ -67,7 +67,6 @@ export const getPullRequestCommits = async (
       'rev-list',
       'HEAD',
       '--no-merges',
-      '--format="%H"',
       `^${mainBranchName}`
     ])
 
