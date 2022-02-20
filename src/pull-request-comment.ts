@@ -29,6 +29,7 @@ ${generatePodium(sortedLeaderboardEntries)}
 
 <details>
 ${LEADERBOARD}
+
 ${generateLeaderboard(sortedLeaderboardEntries)}
 </details>
 
