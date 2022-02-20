@@ -47,7 +47,12 @@ export const getAuthor = async (
   if (!commit) return NO_AUTHOR
 
   try {
-    const authors = await executeGitCommand(['log', '--format="%cN"', commit])
+    const authors = await executeGitCommand([
+      'show',
+      '-s',
+      '--format="%cN"',
+      commit
+    ])
     return authors[0] ?? NO_AUTHOR
   } catch (e) {
     return NO_AUTHOR

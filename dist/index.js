@@ -93,7 +93,12 @@ const getAuthor = (commit) => __awaiter(void 0, void 0, void 0, function* () {
     if (!commit)
         return NO_AUTHOR;
     try {
-        const authors = yield executeGitCommand(['log', '--format="%cN"', commit]);
+        const authors = yield executeGitCommand([
+            'show',
+            '-s',
+            '--format="%cN"',
+            commit
+        ]);
         return (_a = authors[0]) !== null && _a !== void 0 ? _a : NO_AUTHOR;
     }
     catch (e) {
@@ -174,11 +179,11 @@ function run() {
         try {
             const mainBranchName = core.getInput('mainBranchName') || 'main';
             const commits = yield (0, git_commands_1.getWeeksCommits)();
-            core.info(`Fetched current week's commits: ${JSON.stringify(commits)}`);
+            core.info(`Fetched current week's commits: (${commits.length})`);
             const allScores = yield (0, score_1.getAllScores)(commits);
             core.info(`Calculated all score from previous week: ${JSON.stringify(allScores)}`);
             const pullRequestCommits = yield (0, git_commands_1.getPullRequestCommits)(mainBranchName);
-            core.info(`Fetched pull request commits: ${JSON.stringify(pullRequestCommits)}`);
+            core.info(`Fetched pull request commits: (${pullRequestCommits.length})`);
             const me = yield (0, git_commands_1.getAuthor)(pullRequestCommits[0]);
             core.info(`Fetched info about current user: ${me}`);
             const pullRequestScore = yield (0, score_1.getPullRequestScore)(pullRequestCommits);
@@ -279,6 +284,25 @@ exports.getSortedLeaderboardEntries = getSortedLeaderboardEntries;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -293,13 +317,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getChangeScore = exports.getFileScore = exports.getCommitScore = exports.getPullRequestScore = exports.getAllScores = void 0;
+const core = __importStar(__nccwpck_require__(186));
 const utils_1 = __nccwpck_require__(918);
 const git_commands_1 = __nccwpck_require__(703);
 const gitdiff_parser_1 = __importDefault(__nccwpck_require__(153));
 const constants_1 = __nccwpck_require__(105);
 const getAllScores = (commits) => __awaiter(void 0, void 0, void 0, function* () {
     const allScores = {};
-    for (const commit of commits) {
+    const totalCommits = commits.length;
+    for (const [index, commit] of commits.entries()) {
+        if (index % Math.ceil(totalCommits / 10) === 0) {
+            const percent = Math.ceil((100 * index) / totalCommits);
+            core.info(`  # Analysing commit ${index}/${totalCommits} ~ ${percent}%`);
+        }
         const author = yield (0, git_commands_1.getAuthor)(commit);
         const score = yield (0, exports.getCommitScore)(commit);
         if (author in allScores) {
