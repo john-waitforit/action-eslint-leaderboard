@@ -8,7 +8,7 @@ async function run(): Promise<void> {
     const mainBranchName = core.getInput('mainBranchName') || 'main'
 
     const commits = await getWeeksCommits()
-    core.info(`Fetched current week's commits: ${JSON.stringify(commits)}`)
+    core.info(`Fetched current week's commits: (${commits.length})`)
 
     const allScores = await getAllScores(commits)
     core.info(
@@ -16,9 +16,7 @@ async function run(): Promise<void> {
     )
 
     const pullRequestCommits = await getPullRequestCommits(mainBranchName)
-    core.info(
-      `Fetched pull request commits: ${JSON.stringify(pullRequestCommits)}`
-    )
+    core.info(`Fetched pull request commits: (${pullRequestCommits.length})`)
 
     const me = await getAuthor(pullRequestCommits[0])
     core.info(`Fetched info about current user: ${me}`)

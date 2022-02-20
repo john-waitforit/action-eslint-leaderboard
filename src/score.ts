@@ -1,3 +1,4 @@
+import * as core from '@actions/core'
 import {containsEslintDisableFile, containsEslintDisableNextLine} from './utils'
 import {getAuthor, getCommitDiff} from './git-commands'
 import gitDiffParser, {Change, File} from 'gitdiff-parser'
@@ -8,7 +9,14 @@ export const getAllScores = async (
 ): Promise<Record<string, number>> => {
   const allScores: Record<string, number> = {}
 
-  for (const commit of commits) {
+  const totalCommits = commits.length
+
+  for (const [index, commit] of commits.entries()) {
+    if (index % Math.ceil(totalCommits / 10) === 0) {
+      const percent = Math.ceil((100 * index) / totalCommits)
+      core.info(`  # Analysing commit ${index}/${totalCommits} ~ ${percent}%`)
+    }
+
     const author = await getAuthor(commit)
     const score = await getCommitScore(commit)
 
