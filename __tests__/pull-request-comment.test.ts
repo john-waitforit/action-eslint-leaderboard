@@ -79,6 +79,7 @@ describe('Pull request comment', () => {
 
 <details>
 <summary> :bar_chart:  Full leaderboard</summary>
+
 1. **zoro** (101)
 2. **batman** (100)
 3. **james-bond** (99)
