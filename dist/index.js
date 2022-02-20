@@ -106,13 +106,13 @@ const getAuthor = (commit) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getAuthor = getAuthor;
-const getPullRequestCommits = (mainBranchName) => __awaiter(void 0, void 0, void 0, function* () {
+const getPullRequestCommits = (baseBranch) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const commits = yield executeGitCommand([
             'rev-list',
             'HEAD',
             '--no-merges',
-            `^${mainBranchName}`
+            `^${baseBranch}`
         ]);
         return commits;
     }
@@ -177,17 +177,16 @@ const pull_request_comment_1 = __nccwpck_require__(872);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const mainBranchName = core.getInput('mainBranchName') || 'main';
-            core.info(`Input[mainBranchName] = ${core.getInput('mainBranchName')}`);
-            core.info(`Parsed mainBranchName = ${mainBranchName}`);
-            const githubPayload = github.context.payload;
-            core.info(`Context target ref = ${githubPayload.pull_request.base.ref}`);
             const commits = yield (0, git_commands_1.getWeeksCommits)();
             core.info(`Fetched current week's commits: (${commits.length})`);
             const allScores = yield (0, score_1.getAllScores)(commits);
             core.info(`Calculated all scores from previous week: ${Object.keys(allScores).length} authors`);
-            const pullRequestCommits = yield (0, git_commands_1.getPullRequestCommits)(mainBranchName);
-            core.info(`Fetched pull request commits: (${pullRequestCommits.length})`);
+            let pullRequestCommits = [];
+            if (github.context.eventName === 'pull_request') {
+                const githubPayload = github.context.payload;
+                pullRequestCommits = yield (0, git_commands_1.getPullRequestCommits)(githubPayload.pull_request.base.ref);
+                core.info(`Fetched pull request commits: (${pullRequestCommits.length})`);
+            }
             const me = yield (0, git_commands_1.getAuthor)(pullRequestCommits[0]);
             core.info(`Fetched info about current user: ${me}`);
             const pullRequestScore = yield (0, score_1.getPullRequestScore)(pullRequestCommits);

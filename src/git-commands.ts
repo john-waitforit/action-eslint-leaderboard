@@ -60,14 +60,14 @@ export const getAuthor = async (
 }
 
 export const getPullRequestCommits = async (
-  mainBranchName: string
+  baseBranch: string
 ): Promise<string[]> => {
   try {
     const commits = await executeGitCommand([
       'rev-list',
       'HEAD',
       '--no-merges',
-      `^${mainBranchName}`
+      `^${baseBranch}`
     ])
 
     return commits

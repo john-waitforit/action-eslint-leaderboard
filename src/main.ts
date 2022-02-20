@@ -8,13 +8,6 @@ import {generatePrComment} from './pull-request-comment'
 
 async function run(): Promise<void> {
   try {
-    const mainBranchName = core.getInput('mainBranchName') || 'main'
-
-    core.info(`Input[mainBranchName] = ${core.getInput('mainBranchName')}`)
-    core.info(`Parsed mainBranchName = ${mainBranchName}`)
-    const githubPayload = github.context.payload as PullRequestEvent
-    core.info(`Context target ref = ${githubPayload.pull_request.base.ref}`)
-
     const commits = await getWeeksCommits()
     core.info(`Fetched current week's commits: (${commits.length})`)
 
@@ -25,8 +18,15 @@ async function run(): Promise<void> {
       } authors`
     )
 
-    const pullRequestCommits = await getPullRequestCommits(mainBranchName)
-    core.info(`Fetched pull request commits: (${pullRequestCommits.length})`)
+    let pullRequestCommits: string[] = []
+
+    if (github.context.eventName === 'pull_request') {
+      const githubPayload = github.context.payload as PullRequestEvent
+      pullRequestCommits = await getPullRequestCommits(
+        githubPayload.pull_request.base.ref
+      )
+      core.info(`Fetched pull request commits: (${pullRequestCommits.length})`)
+    }
 
     const me = await getAuthor(pullRequestCommits[0])
     core.info(`Fetched info about current user: ${me}`)
