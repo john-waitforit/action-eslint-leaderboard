@@ -69,10 +69,10 @@ export const generateYourScore = (
 
   const weekScore =
     myLeaderboardIndex === -1
-      ? ''
+      ? '?'
       : sortedLeaderboardEntries[myLeaderboardIndex].score
 
-  const weekRank = myLeaderboardIndex === -1 ? '' : myLeaderboardIndex + 1
+  const weekRank = myLeaderboardIndex === -1 ? '?' : myLeaderboardIndex + 1
 
   const PR_SCORE = `- Points earned with this PR:`
   const WEEK_SCORE = `- Points earned since the beginning of the week:`
