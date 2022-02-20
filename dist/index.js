@@ -112,7 +112,6 @@ const getPullRequestCommits = (mainBranchName) => __awaiter(void 0, void 0, void
             'rev-list',
             'HEAD',
             '--no-merges',
-            '--format="%H"',
             `^${mainBranchName}`
         ]);
         return commits;
@@ -181,7 +180,7 @@ function run() {
             const commits = yield (0, git_commands_1.getWeeksCommits)();
             core.info(`Fetched current week's commits: (${commits.length})`);
             const allScores = yield (0, score_1.getAllScores)(commits);
-            core.info(`Calculated all score from previous week: ${JSON.stringify(allScores)}`);
+            core.info(`Calculated all scores from previous week: ${Object.keys(allScores).length} authors`);
             const pullRequestCommits = yield (0, git_commands_1.getPullRequestCommits)(mainBranchName);
             core.info(`Fetched pull request commits: (${pullRequestCommits.length})`);
             const me = yield (0, git_commands_1.getAuthor)(pullRequestCommits[0]);
@@ -229,6 +228,7 @@ ${(0, exports.generatePodium)(sortedLeaderboardEntries)}
 
 <details>
 ${LEADERBOARD}
+
 ${(0, exports.generateLeaderboard)(sortedLeaderboardEntries)}
 </details>
 
@@ -251,9 +251,9 @@ const formatLeaderboardEntry = (leaderboardEntry) => leaderboardEntry
 const generateYourScore = (sortedLeaderboardEntries, me, pullRequestScore) => {
     const myLeaderboardIndex = sortedLeaderboardEntries.findIndex(entry => entry.author === me);
     const weekScore = myLeaderboardIndex === -1
-        ? ''
+        ? '?'
         : sortedLeaderboardEntries[myLeaderboardIndex].score;
-    const weekRank = myLeaderboardIndex === -1 ? '' : myLeaderboardIndex + 1;
+    const weekRank = myLeaderboardIndex === -1 ? '?' : myLeaderboardIndex + 1;
     const PR_SCORE = `- Points earned with this PR:`;
     const WEEK_SCORE = `- Points earned since the beginning of the week:`;
     const RANK = `- Rank:`;
