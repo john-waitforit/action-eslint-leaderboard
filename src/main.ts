@@ -1,11 +1,19 @@
 import * as core from '@actions/core'
+import * as github from '@actions/github'
 import {getAllScores, getPullRequestScore} from './score'
 import {getAuthor, getPullRequestCommits, getWeeksCommits} from './git-commands'
+// eslint-disable-next-line import/no-unresolved
+import {PullRequestEvent} from '@octokit/webhooks-definitions/schema'
 import {generatePrComment} from './pull-request-comment'
 
 async function run(): Promise<void> {
   try {
     const mainBranchName = core.getInput('mainBranchName') || 'main'
+
+    core.info(`Input[mainBranchName] = ${core.getInput('mainBranchName')}`)
+    core.info(`Parsed mainBranchName = ${mainBranchName}`)
+    const githubPayload = github.context.payload as PullRequestEvent
+    core.info(`Context target ref = ${githubPayload.pull_request.base.ref}`)
 
     const commits = await getWeeksCommits()
     core.info(`Fetched current week's commits: (${commits.length})`)
