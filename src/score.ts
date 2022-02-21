@@ -23,7 +23,7 @@ export const getAllScores = async (
     if (author in allScores) {
       allScores[author] += score
     } else {
-      allScores[author] = 0
+      allScores[author] = score
     }
   }
 

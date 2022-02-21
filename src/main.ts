@@ -10,7 +10,6 @@ async function run(): Promise<void> {
   try {
     const commits = await getWeeksCommits()
     core.info(`Fetched current week's commits: (${commits.length})`)
-    core.info(`${commits}`)
 
     const allScores = await getAllScores(commits)
     core.info(`Calculated all scores from previous week:`)
