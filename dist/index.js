@@ -179,6 +179,7 @@ function run() {
         try {
             const commits = yield (0, git_commands_1.getWeeksCommits)();
             core.info(`Fetched current week's commits: (${commits.length})`);
+            core.info(`${commits}`);
             const allScores = yield (0, score_1.getAllScores)(commits);
             core.info(`Calculated all scores from previous week:`);
             core.info(`${JSON.stringify(allScores, null, 4)}`);
