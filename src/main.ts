@@ -12,11 +12,8 @@ async function run(): Promise<void> {
     core.info(`Fetched current week's commits: (${commits.length})`)
 
     const allScores = await getAllScores(commits)
-    core.info(
-      `Calculated all scores from previous week: ${
-        Object.keys(allScores).length
-      } authors`
-    )
+    core.info(`Calculated all scores from previous week:`)
+    core.info(`${JSON.stringify(allScores, null, 4)}`)
 
     let pullRequestCommits: string[] = []
 
