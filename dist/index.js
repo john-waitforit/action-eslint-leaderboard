@@ -124,7 +124,7 @@ exports.getPullRequestCommits = getPullRequestCommits;
 const getCommitDiff = (commit) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const diffLines = yield executeGitCommand(['diff', `${commit}~`, commit], false);
-        return diffLines[0];
+        return diffLines.join('\n');
     }
     catch (e) {
         return '';
