@@ -1,6 +1,6 @@
 {
   "name": "action-eslint-leaderboard",
-  "version": "v0.9.10",
+  "version": "v0.9.11",
   "private": true,
   "description": "Generate a leaderboard based on eslint-disable comments removed",
   "main": "lib/main.js",
