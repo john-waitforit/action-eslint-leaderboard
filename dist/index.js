@@ -357,12 +357,15 @@ const getPullRequestScore = (pullRequestCommits) => __awaiter(void 0, void 0, vo
 });
 exports.getPullRequestScore = getPullRequestScore;
 const getCommitScore = (commit) => __awaiter(void 0, void 0, void 0, function* () {
+    const ignorePattern = core.getInput('ignorePattern') || '';
     try {
         const commitDiff = yield (0, git_commands_1.getCommitDiff)(commit);
         const files = gitdiff_parser_1.default.parse(commitDiff);
         let score = 0;
         for (const file of files) {
-            score += (0, exports.getFileScore)(file);
+            if (!(0, utils_1.isFileIgnored)(ignorePattern, file.newPath)) {
+                score += (0, exports.getFileScore)(file);
+            }
         }
         return score;
     }
@@ -413,7 +416,7 @@ const getCommitScoreMultiplier = (change) => {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getMonday = exports.containsEslintDisableFile = exports.containsEslintDisableNextLine = void 0;
+exports.isFileIgnored = exports.getMonday = exports.containsEslintDisableFile = exports.containsEslintDisableNextLine = void 0;
 const containsEslintDisableNextLine = (text) => text.trim().includes('eslint-disable-next-line');
 exports.containsEslintDisableNextLine = containsEslintDisableNextLine;
 const containsEslintDisableFile = (text) => text.trim().includes('eslint-disable ');
@@ -427,6 +430,13 @@ const getMonday = (inputDate) => {
     return new Date(monday);
 };
 exports.getMonday = getMonday;
+const isFileIgnored = (ignorePattern, filePath) => {
+    if (!ignorePattern) {
+        return false;
+    }
+    return filePath.includes(ignorePattern);
+};
+exports.isFileIgnored = isFileIgnored;
 
 
 /***/ }),

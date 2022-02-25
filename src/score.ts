@@ -1,5 +1,9 @@
 import * as core from '@actions/core'
-import {containsEslintDisableFile, containsEslintDisableNextLine} from './utils'
+import {
+  containsEslintDisableFile,
+  containsEslintDisableNextLine,
+  isFileIgnored
+} from './utils'
 import {getAuthor, getCommitDiff} from './git-commands'
 import gitDiffParser, {Change, File} from 'gitdiff-parser'
 import {POINTS} from './constants'
@@ -44,13 +48,17 @@ export const getPullRequestScore = async (
 }
 
 export const getCommitScore = async (commit: string): Promise<number> => {
+  const ignorePattern: string = core.getInput('ignorePattern') || ''
+
   try {
     const commitDiff = await getCommitDiff(commit)
     const files = gitDiffParser.parse(commitDiff)
 
     let score = 0
     for (const file of files) {
-      score += getFileScore(file)
+      if (!isFileIgnored(ignorePattern, file.newPath)) {
+        score += getFileScore(file)
+      }
     }
 
     return score
