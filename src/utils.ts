@@ -15,3 +15,13 @@ export const getMonday = (inputDate: Date): Date => {
 
   return new Date(monday)
 }
+
+export const isFileIgnored = (
+  ignorePattern: string,
+  filePath: string
+): boolean => {
+  if (!ignorePattern) {
+    return false
+  }
+  return filePath.includes(ignorePattern)
+}

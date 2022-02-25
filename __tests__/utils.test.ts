@@ -1,5 +1,5 @@
 import {expect, describe, it} from '@jest/globals'
-import {getMonday} from '../src/utils'
+import {getMonday, isFileIgnored} from '../src/utils'
 import {getFileScore} from '../src/score'
 import {
   diffWithDisableNextLineRemoved,
@@ -39,5 +39,21 @@ describe('Score utils', () => {
       const monday = getMonday(new Date('2022-02-19T11:11:33.165Z'))
       expect(monday.toISOString()).toBe('2022-02-14T00:00:00.000Z')
     })
+  })
+
+  describe('isFileIgnored', () => {
+    it.each`
+      ignorePattern  | filePath                                                                                                     | isIgnored
+      ${'generated'} | ${'packages/graphql/src/Contact/__generated__/create-contact-from-email-for-supplier.mutation.generated.ts'} | ${true}
+      ${'spec'}      | ${'packages/graphql/src/Contact/__generated__/create-contact-from-email-for-supplier.mutation.generated.ts'} | ${false}
+      ${'generated'} | ${'packages/graphql/src/Contact/create-contact-from-email-for-supplier.mutation.ts'}                         | ${false}
+      ${''}          | ${'packages/graphql/src/Contact/create-contact-from-email-for-supplier.mutation.ts'}                         | ${false}
+    `(
+      'should return $isIgnored for "$ignorePattern" and $filePath',
+      ({ignorePattern, filePath, isIgnored}) => {
+        const result = isFileIgnored(ignorePattern, filePath)
+        expect(result).toBe(isIgnored)
+      }
+    )
   })
 })
