@@ -124,7 +124,7 @@ exports.getPullRequestCommits = getPullRequestCommits;
 const getCommitDiff = (commit) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const diffLines = yield executeGitCommand(['diff', `${commit}~`, commit], false);
-        return diffLines.join('\n');
+        return diffLines.join(' ');
     }
     catch (e) {
         return '';
@@ -370,6 +370,7 @@ const getCommitScore = (commit) => __awaiter(void 0, void 0, void 0, function* (
         return score;
     }
     catch (e) {
+        core.warning(`getCommitScore > Error: ${e}`);
         return 0;
     }
 });
