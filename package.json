@@ -1,6 +1,6 @@
 {
   "name": "action-eslint-leaderboard",
-  "version": "v0.9.11",
+  "version": "v0.9.12",
   "private": true,
   "description": "Generate a leaderboard based on eslint-disable comments removed",
   "main": "lib/main.js",
@@ -34,7 +34,7 @@
   "devDependencies": {
     "@types/node": "^16.10.5",
     "@typescript-eslint/parser": "^5.8.1",
-    "@vercel/ncc": "^0.31.1",
+    "@vercel/ncc": "^0.34.0",
     "eslint": "^7.32.0",
     "eslint-plugin-github": "^4.3.2",
     "eslint-plugin-jest": "^25.3.2",
