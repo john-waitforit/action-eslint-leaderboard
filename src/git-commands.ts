@@ -82,7 +82,7 @@ export const getCommitDiff = async (commit: string): Promise<string> => {
       ['diff', `${commit}~`, commit],
       false
     )
-    return diffLines.join('\n')
+    return diffLines.join(' ')
   } catch (e) {
     return ''
   }
