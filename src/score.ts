@@ -63,6 +63,7 @@ export const getCommitScore = async (commit: string): Promise<number> => {
 
     return score
   } catch (e) {
+    core.warning(`getCommitScore > Error: ${e}`)
     return 0
   }
 }
