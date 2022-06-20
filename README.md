@@ -1,105 +1,69 @@
-<p align="center">
+# 🛡 Eslint leaderboard (Github Action)
+
+<p>
   <a href="https://github.com/actions/typescript-action/actions"><img alt="typescript-action status" src="https://github.com/actions/typescript-action/workflows/build-test/badge.svg"></a>
 </p>
 
-# Create a JavaScript Action using TypeScript
+---
 
-Use this template to bootstrap the creation of a TypeScript action.:rocket:
+Have you always wondered how to improve quality on your projects?
 
-This template includes compilation support, tests, a validation workflow, publishing, and versioning guidance.  
+Look no further!
 
-If you are new, there's also a simpler introduction.  See the [Hello World JavaScript Action](https://github.com/actions/hello-world-javascript-action)
+With this github action, you'll be able to automatically generate a leaderboard of your eslint heroes[^1] and add it to your pull requests.
 
-## Create an action from this template
+![leaderboard-screenshot](./images/leaderboard-screenshot.png)
 
-Click the `Use this Template` and provide the new repo details for your action
+> **Warning**
+>
+> Disclaimer, eslint is not perfect. Removing eslint warnings/errors might introduce regressions if not properly tested.
 
-## Code in Main
+## 🏃 Quickstart
 
-> First, you'll need to have a reasonably modern version of `node` handy. This won't work with versions older than 9, for instance.
+To use this github action, create a new workflow in your `.github` folder:
 
-Install the dependencies  
-```bash
-$ npm install
+```yml
+name: 'Eslint Heroes'
+
+on: pull_request
+
+jobs:
+  pull-request-comment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - run: git checkout ${{ github.event.pull_request.base.ref }} # Necessary to add main in the git branches
+      - run: git checkout ${{ github.event.pull_request.head.ref }} # Necessary to get the list of commits between head and master
+      - uses: john-waitforit/action-eslint-leaderboard@v0.9.12
+        id: 'action-eslint-leaderboard'
+        with:
+          ignorePattern: 'generated'
+      - uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: eslint-heroes # this is hidden, only used to update existing comment instead of creating new ones
+          message: ${{ steps.action-eslint-leaderboard.outputs.pr-comment }}
 ```
 
-Build the typescript and package it for distribution
-```bash
-$ npm run build && npm run package
-```
+This is it, open a PR with this change and you should see a comment posted within 3 minutes :)
+Once merged, future PRs including this workflow will also have a leaderboard.
 
-Run the tests :heavy_check_mark:  
-```bash
-$ npm test
+## 📝 Pre-requisites
 
- PASS  ./index.test.js
-  ✓ throws invalid number (3ms)
-  ✓ wait 500 ms (504ms)
-  ✓ test runs (95ms)
+This action relies on the git diff and the addition & removal on lines containing `eslint-disable`.
 
-...
-```
+This means that if you have eslint rules set as warnings, they will not be counted in the leaderboard.
 
-## Change action.yml
+My recommendation is to set all your rules as errors (in your .eslint.json or equivalent config). When doing that, you will probably end up with a lot of outstanding errors blocking your CI. You can use [clinter](https://github.com/theodo/clinter) to automatically insert `eslint-disable` comments.
 
-The action.yml defines the inputs and output for your action.
+## ⚙️ How does it work?
 
-Update the action.yml with your name, description, inputs and outputs for your action.
+Everything is computed on the fly so no server / database are needed.
 
-See the [documentation](https://help.github.com/en/articles/metadata-syntax-for-github-actions)
+The source of truth is your git history, this action simply goes through the commits and the git diff and counts the lines added/removed that contain `eslint-disable`.
 
-## Change the Code
+Because it only computes the score of the current week the number of commits is reasonable (usually below 1 000) which means the action runs within 1 min.
 
-Most toolkit and CI/CD operations involve async operations so the action is run in an async function.
-
-```javascript
-import * as core from '@actions/core';
-...
-
-async function run() {
-  try { 
-      ...
-  } 
-  catch (error) {
-    core.setFailed(error.message);
-  }
-}
-
-run()
-```
-
-See the [toolkit documentation](https://github.com/actions/toolkit/blob/master/README.md#packages) for the various packages.
-
-## Publish to a distribution branch
-
-Actions are run from GitHub repos so we will checkin the packed dist folder. 
-
-Then run [ncc](https://github.com/zeit/ncc) and push the results:
-```bash
-$ npm run package
-$ git add dist
-$ git commit -a -m "prod dependencies"
-$ git push origin releases/v1
-```
-
-Note: We recommend using the `--license` option for ncc, which will create a license file for all of the production node modules used in your project.
-
-Your action is now published! :rocket: 
-
-See the [versioning documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-
-## Validate
-
-You can now validate the action by referencing `./` in a workflow in your repo (see [test.yml](.github/workflows/test.yml))
-
-```yaml
-uses: ./
-with:
-  milliseconds: 1000
-```
-
-See the [actions tab](https://github.com/actions/typescript-action/actions) for runs of this action! :rocket:
-
-## Usage:
-
-After testing you can [create a v1 tag](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md) to reference the stable and latest V1 action
+[^1]: Eslint hero: nickname for an amazing dev removing eslint warnings and improving the codebase quality.
