@@ -96,7 +96,7 @@ const getAuthor = (commit) => __awaiter(void 0, void 0, void 0, function* () {
         const authors = yield executeGitCommand([
             'show',
             '-s',
-            '--format="%cN"',
+            '--format="%aN"',
             commit
         ]);
         return (_a = authors[0]) !== null && _a !== void 0 ? _a : NO_AUTHOR;
