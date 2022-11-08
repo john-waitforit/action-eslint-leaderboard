@@ -37,7 +37,7 @@ jobs:
           fetch-depth: 0
       - run: git checkout ${{ github.event.pull_request.base.ref }} # Necessary to add main in the git branches
       - run: git checkout ${{ github.event.pull_request.head.ref }} # Necessary to get the list of commits between head and master
-      - uses: john-waitforit/action-eslint-leaderboard@v0.9.12
+      - uses: john-waitforit/action-eslint-leaderboard@v0.9.13
         id: 'action-eslint-leaderboard'
         with:
           ignorePattern: 'generated'
