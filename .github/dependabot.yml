@@ -4,8 +4,12 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Disable all pull requests for github-actions
+    open-pull-requests-limit: 0
 
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
+    # Disable all pull requests for npm
+    open-pull-requests-limit: 0
